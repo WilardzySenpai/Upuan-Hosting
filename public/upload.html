@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Upload Google Drive Video</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background: #f4f6f8;
+      color: #333;
+      padding: 50px;
+    }
+    input, button {
+      padding: 10px;
+      width: 80%;
+      max-width: 400px;
+      margin: 10px 0;
+      font-size: 16px;
+    }
+    button {
+      background: #007bff;
+      border: none;
+      color: white;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+    #result a {
+      color: #007bff;
+    }
+  </style>
+</head>
+<body>
+  <h1>Google Drive Video Uploader</h1>
+  <p>Paste your Google Drive link below. The server will create a new page for it automatically.</p>
+  
+  <input type="text" id="driveLink" placeholder="Paste your Google Drive link here" />
+  <br />
+  <button id="uploadBtn">Generate Video Page</button>
+
+  <div id="result"></div>
+
+  <script>
+    document.getElementById('uploadBtn').onclick = async function() {
+      const link = document.getElementById("driveLink").value.trim();
+      const resultDiv = document.getElementById("result");
+      resultDiv.innerHTML = '';
+      if (!link) {
+        alert("Please enter a Google Drive link!");
+        return;
+      }
+      try {
+        const res = await fetch('/api/create-video-page', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ driveLink: link })
+        });
+        const data = await res.json();
+        if (res.ok && data.url) {
+          resultDiv.innerHTML = `<p>✅ Page created: <a href="${data.url}" target="_blank">${window.location.origin}${data.url}</a></p>`;
+        } else {
+          resultDiv.innerHTML = `<p style="color:red;">❌ ${data.error || 'Unknown error'}</p>`;
+        }
+      } catch (err) {
+        resultDiv.innerHTML = `<p style="color:red;">❌ Failed to contact server</p>`;
+      }
+    }
+  </script>
+</body>
+</html>
